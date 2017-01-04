@@ -114,8 +114,9 @@ def main():
         helper.frame_operations.draw_feature_extraction(
             vector_angles, delta_angle, movement_coeff, src)
 
-    def draw_secondary_values(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas):
-        print(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas)
+    def draw_secondary_values(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, src):
+        helper.frame_operations.draw_fall_detection(
+            mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, src)
 
 
     # main: here runs the code
@@ -147,7 +148,7 @@ def main():
                 largest_contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_fall, frame)
 
             draw_secondary_values(
-                mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas)
+                mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, frame)
 
         cv2.imshow('feed', frame)
         cv2.imshow('backgroundmask', background_mask)
