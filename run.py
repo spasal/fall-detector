@@ -11,9 +11,6 @@ Algorithm -
 Accuracy goal - at least 85%% of cases (100% is impossible)
 '''
 
-# http://intermediate-and-advanced-software-carpentry.readthedocs.io/en/latest/structuring-python.html
-# https://coderwall.com/p/lt2kew/python-creating-your-project-structure
-# todo http://www.pyimagesearch.com/2015/11/09/pedestrian-detection-opencv/
 
 def main():
     import cv2
@@ -21,7 +18,7 @@ def main():
     import helper
 
     # 1 prepare frame for shape analysis
-    def background_estimation(frame):
+    def background_estimation(src):
         ''''
         prepares the frame for further analysis.
         1: frame --> gray and blur
@@ -29,7 +26,7 @@ def main():
         3: find biggest contour inside bin_treshold
         '''
 
-        frame, gray = helper.frame_operations.prepare_frame(frame)
+        src, gray = helper.frame_operations.prepare_frame(src)
         backgroundmask, bintreshold = core.background_substraction(gray)
         largest_contour = helper.frame_operations.find_largest_contour(bintreshold)
 
@@ -37,7 +34,7 @@ def main():
             bintreshold = helper.frame_operations.clean_frame_within_contour(bintreshold, largest_contour)
             backgroundmask = helper.frame_operations.clean_frame_within_contour(backgroundmask, largest_contour)
 
-        return frame, backgroundmask, bintreshold, largest_contour
+        return src, backgroundmask, bintreshold, largest_contour
 
 
     # 2 shape analysis for further feature exraction
@@ -47,10 +44,10 @@ def main():
         2: calculate pca around contour
             a: get mean_vector
             b: get median direction vector
-            c: draw the vector
+        3: calculate motion history image
         '''
 
-        frame, ellipse = helper.frame_operations.draw_ellipse(src, contour)
+        ellipse = helper.frame_operations.calculate_ellipse(contour)
         big_axis_length = ellipse[0][1]/2
 
         eig_pairs, mean_vec = core.pca_methods.calculate_pca(contour)
@@ -59,7 +56,6 @@ def main():
             # 1 eig vectors
             eig_vecs = core.pca_methods.get_latest_eig_vectors(eig_pairs)
             points = helper.calculus.calculate_points(eig_vecs, mean_vec, big_axis_length)
-            frame = core.pca_methods.draw_pca_on_image(points, frame)
 
             # 2 calculate motion history image
             mhi = core.motion_history.calculate_mhi_frame(binary_threshold, frame)
@@ -74,13 +70,10 @@ def main():
         2: calculate delta angle between the 2 vectors
         3: calculate motion coefficient
         '''
+
         vector_angles = helper.calculus.calculate_vectors_angle(eig_vecs_points)
         delta_angle = helper.calculus.calculate_delta_angle(eig_vecs_points[0], eig_vecs_points[1])
-
         movement_coeff = core.motion_history.calculate_movement_coeff(contour, binary_threshold, mhi)
-
-        src = helper.frame_operations.draw_angles(vector_angles, delta_angle, src)
-        src = helper.frame_operations.draw_movement(movement_coeff, src)
 
         return vector_angles, delta_angle, movement_coeff
 
@@ -92,13 +85,14 @@ def main():
         2: speed of change pca
         3: mate van verandering
         '''
+
         mean_direction_diff_vec, mean_delta_pca, mean_anlge_pcas = core.fall_detection.calculate_values(mean_vec, delta_angle, vector_angles)
         return False
 
     
     # extra: draw relevant data
     def draw_values_on_frame(contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_fall, src ):
-        frame, ellipse = helper.frame_operations.draw_ellipse2(src, contour, is_fall)
+        frame, ellipse = helper.frame_operations.draw_ellipse(src, contour, is_fall)
 
         big_axis_length = ellipse[0][1]/2
         frame = core.pca_methods.draw_pca_on_image(eig_vecs_points, frame)
@@ -109,8 +103,11 @@ def main():
     
     # main: here runs the code
     cap = cv2.VideoCapture(0)
-    (grabbed, frame) = cap.read()
-    core.motion_history.initialze_mhi(frame)
+    grabbed = False
+    while not grabbed:
+        (grabbed, frame) = cap.read()
+        if grabbed:
+            core.motion_history.initialze_mhi(frame)
 
     while cap.isOpened():
         (grabbed, frame) = cap.read()

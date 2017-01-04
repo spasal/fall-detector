@@ -1,5 +1,6 @@
+import numpy as np
 import cv2
-import imutils
+
 _useGaussian = True
 _gaussianPixels = 21
 
@@ -36,8 +37,6 @@ def find_largest_contour(binary_threshold):
     return largest_contour
 
 
-import numpy as np
-
 def clean_frame_within_contour(src, contour):
     """
     todo
@@ -48,16 +47,17 @@ def clean_frame_within_contour(src, contour):
     src = np.bitwise_and(src, mask)
     return src
 
-# drawing functions
+
+def calculate_ellipse(contour):
+    ellipse = cv2.fitEllipse(contour)
+    return ellipse
+
+
+'''' DRAWING FUNCTIONS '''
 __font_face, __font_scale, = cv2.FONT_HERSHEY_SIMPLEX, 0.75
 __font_color, __font_thickness = (255, 255, 255), 2
 
-def draw_ellipse(frame, contour):
-    ellipse = cv2.fitEllipse(contour)
-    cv2.ellipse(frame, ellipse, (0,0,200), 2)
-    return frame, ellipse
-
-def draw_ellipse2(frame, contour, is_fall=False):
+def draw_ellipse(frame, contour, is_fall=False):
     ellipse = cv2.fitEllipse(contour)
     color = (0, 0, 255) if is_fall is True else (0, 255, 0)
     cv2.ellipse(frame, ellipse, color, 2)
