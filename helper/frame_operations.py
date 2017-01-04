@@ -48,11 +48,6 @@ def clean_frame_within_contour(src, contour):
     return src
 
 
-def calculate_ellipse(contour):
-    ellipse = cv2.fitEllipse(contour)
-    return ellipse
-
-
 '''' DRAWING FUNCTIONS '''
 __font_face, __font_scale, = cv2.FONT_HERSHEY_SIMPLEX, 0.75
 __font_color, __font_thickness = (255, 255, 255), 2

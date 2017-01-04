@@ -1,5 +1,6 @@
 from math import atan2,degrees, sqrt, pow, acos
 import numpy as np
+import cv2
 
 def calculate_points(eig_vecs, mean_vec, axis_length):
     points = []
@@ -59,3 +60,8 @@ def calculate_delta_angle(vector1, vector2):
         delta -= 360
 
     return abs(delta)
+
+
+def calculate_ellipse(contour):
+    ellipse = cv2.fitEllipse(contour)
+    return ellipse

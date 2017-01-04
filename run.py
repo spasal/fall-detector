@@ -49,7 +49,7 @@ def main():
         3: calculate motion history image
         '''
 
-        ellipse = helper.frame_operations.calculate_ellipse(contour)
+        ellipse = helper.calculus.calculate_ellipse(contour)
         big_axis_length = ellipse[0][1]/2
 
         eig_pairs, mean_vec = core.pca_methods.calculate_pca(contour)
@@ -125,6 +125,7 @@ def main():
         (grabbed, frame) = cap.read()
         if grabbed:
             core.motion_history.initialze_mhi(frame)
+
 
     while cap.isOpened():
         (grabbed, frame) = cap.read()
