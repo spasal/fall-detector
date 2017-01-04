@@ -1,23 +1,16 @@
 import numpy as np
 
 class FallDetector():
-    def __init__(self):
-        self._mean_vecs = []
-        self._mean_vecs.append([]), self._mean_vecs.append([])        
-
-        self._delta_pcas = []
-
-        self._angle_pcas = []
-        self._angle_pcas.append([]), self._angle_pcas.append([])
-
-        self.var_length = 30
-
     def calculate_values(self, mean_vec, delta_pca, vector_angles):
         self.__update_values(mean_vec, delta_pca, vector_angles)
         self.__calculate_mean_values()
         print("mean_vec: %s delta_pca: %s pcas: %s" % (self.mean_direction_diff_vec, self.mean_delta_pca, self.mean_anlge_pcas))
         return self.mean_direction_diff_vec, self.mean_delta_pca, self.mean_anlge_pcas
-
+    
+    def is_fall(self):
+        return False
+    
+    '''' CORE PRIVATE HELPERS '''
     def __calculate_mean_values(self):
         # python mean difference of list items
         def calculate_differences(seq):
@@ -51,6 +44,7 @@ class FallDetector():
         self.__pop_propval(self._angle_pcas, True)
 
 
+    '''' EXTRA PRIVATE HELPERS '''
     def __pop_propval(self, prop, is_pair=False):
         if len(prop) > self.var_length:
             if not is_pair:
@@ -65,7 +59,17 @@ class FallDetector():
         else:
             prop[0].append(val[0])
             prop[1].append(val[1])
-            # print("prop: %s prop0: %s prop1: %s val: %s val1: %s val2: %s" % (prop, prop[0], prop[1], val, val[0], val[1]))
+    
+    def __init__(self):
+        self._mean_vecs = []
+        self._mean_vecs.append([]), self._mean_vecs.append([])        
+
+        self._delta_pcas = []
+
+        self._angle_pcas = []
+        self._angle_pcas.append([]), self._angle_pcas.append([])
+
+        self.var_length = 30
 
 
 fall_detection = FallDetector()

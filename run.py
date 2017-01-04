@@ -31,14 +31,16 @@ def main():
         largest_contour = helper.frame_operations.find_largest_contour(bintreshold)
 
         if largest_contour is not None:
-            bintreshold = helper.frame_operations.clean_frame_within_contour(bintreshold, largest_contour)
-            backgroundmask = helper.frame_operations.clean_frame_within_contour(backgroundmask, largest_contour)
+            bintreshold = helper.frame_operations.clean_frame_within_contour(
+                bintreshold, largest_contour)
+            backgroundmask = helper.frame_operations.clean_frame_within_contour(
+                backgroundmask, largest_contour)
 
         return src, backgroundmask, bintreshold, largest_contour
 
 
     # 2 shape analysis for further feature exraction
-    def shape_analysis(binary_threshold, contour, src):
+    def shape_analysis(binary_threshold, contour):
         ''''
         1: calculate ellipse around contour
         2: calculate pca around contour
@@ -55,25 +57,32 @@ def main():
         if mean_vec is not None and eig_pairs is not None:
             # 1 eig vectors
             eig_vecs = core.pca_methods.get_latest_eig_vectors(eig_pairs)
-            points = helper.calculus.calculate_points(eig_vecs, mean_vec, big_axis_length)
+            points = helper.calculus.calculate_points(
+                eig_vecs, mean_vec, big_axis_length)
 
             # 2 calculate motion history image
-            mhi = core.motion_history.calculate_mhi_frame(binary_threshold, frame)
+            mhi = core.motion_history.calculate_mhi_frame(
+                binary_threshold, frame)
 
         return points, mean_vec, mhi
 
 
     # 3 feature extraction from shape analysis
-    def feature_extraction(contour, eig_vecs_points, binary_threshold, mhi, src):
+    def feature_extraction(contour, eig_vecs_points, binary_threshold, mhi):
         ''''
         1: calculate both PCA angles
         2: calculate delta angle between the 2 vectors
         3: calculate motion coefficient
         '''
 
-        vector_angles = helper.calculus.calculate_vectors_angle(eig_vecs_points)
-        delta_angle = helper.calculus.calculate_delta_angle(eig_vecs_points[0], eig_vecs_points[1])
-        movement_coeff = core.motion_history.calculate_movement_coeff(contour, binary_threshold, mhi)
+        vector_angles = helper.calculus.calculate_vectors_angle(
+            eig_vecs_points)
+
+        delta_angle = helper.calculus.calculate_delta_angle(
+            eig_vecs_points[0], eig_vecs_points[1])
+
+        movement_coeff = core.motion_history.calculate_movement_coeff(
+            contour, binary_threshold, mhi)
 
         return vector_angles, delta_angle, movement_coeff
 
@@ -86,21 +95,29 @@ def main():
         3: mate van verandering
         '''
 
-        mean_direction_diff_vec, mean_delta_pca, mean_anlge_pcas = core.fall_detection.calculate_values(mean_vec, delta_angle, vector_angles)
-        return False
+        (mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas) = core.fall_detection.calculate_values(
+            mean_vec, delta_angle, vector_angles)
 
-    
+        is_fall = core.fall_detection.is_fall()
+
+        return mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, is_fall
+
+
     # extra: draw relevant data
-    def draw_values_on_frame(contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_fall, src ):
-        frame, ellipse = helper.frame_operations.draw_ellipse(src, contour, is_fall)
+    def draw_primary_values(contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_fall, src):
+        helper.frame_operations.draw_ellipse(
+            src, contour, is_fall)
 
-        big_axis_length = ellipse[0][1]/2
-        frame = core.pca_methods.draw_pca_on_image(eig_vecs_points, frame)
+        core.pca_methods.draw_pca_on_image(
+            eig_vecs_points, src)
 
-        frame = helper.frame_operations.draw_angles(vector_angles, delta_angle, frame)
-        frame = helper.frame_operations.draw_movement(movement_coeff, src)
+        helper.frame_operations.draw_feature_extraction(
+            vector_angles, delta_angle, movement_coeff, src)
 
-    
+    def draw_secondary_values(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas):
+        print(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas)
+
+
     # main: here runs the code
     cap = cv2.VideoCapture(0)
     grabbed = False
@@ -116,10 +133,20 @@ def main():
         frame, background_mask, binary_threshold, largest_contour = background_estimation(frame)
 
         if largest_contour is not None:
-            (eig_vecs_points, mean_vec, mhi) = shape_analysis(background_mask, largest_contour, frame)
-            (vector_angles, delta_angle, movement_coeff) = feature_extraction(largest_contour, eig_vecs_points, background_mask, mhi, frame)
-            is_fall = fall_detection(mean_vec, vector_angles, delta_angle, movement_coeff)
-            draw_values_on_frame(largest_contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_fall, frame)
+            (eig_vecs_points, mean_vec, mhi) = shape_analysis(
+                background_mask, largest_contour)
+
+            (vector_angles, delta_angle, movement_coeff) = feature_extraction(
+                largest_contour, eig_vecs_points, background_mask, mhi)
+
+            (mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, is_fall) = fall_detection(
+                mean_vec, vector_angles, delta_angle, movement_coeff)
+
+            draw_primary_values(
+                largest_contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_fall, frame)
+
+            draw_secondary_values(
+                mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas)
 
         cv2.imshow('feed', frame)
         cv2.imshow('backgroundmask', background_mask)

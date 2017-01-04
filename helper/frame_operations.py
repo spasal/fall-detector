@@ -56,28 +56,21 @@ def calculate_ellipse(contour):
 '''' DRAWING FUNCTIONS '''
 __font_face, __font_scale, = cv2.FONT_HERSHEY_SIMPLEX, 0.75
 __font_color, __font_thickness = (255, 255, 255), 2
+__min_width, __min_height = 0, 0
+__max_width, __max_height = 0, 0
 
 def draw_ellipse(frame, contour, is_fall=False):
     ellipse = cv2.fitEllipse(contour)
     color = (0, 0, 255) if is_fall is True else (0, 255, 0)
     cv2.ellipse(frame, ellipse, color, 2)
-    return frame, ellipse
 
-def draw_angles(vector_angles, delta_angle, src):
-    angle1, org1 = "primary PCA: " + str(int(vector_angles[0])), (10,30)
-    angle2, org2 = "secondary PCA: " + str(int(vector_angles[1])), (10,60)
-    angle3, org3 = "PCA delta: " + str(int(delta_angle)), (10,90)
+def draw_feature_extraction(vector_angles, delta_angle, movement, src):
+    angle1, org1 = "primary PCA: " + str(int(vector_angles[0])), (__min_width + 10, __min_height + 30)
+    angle2, org2 = "secondary PCA: " + str(int(vector_angles[1])), (__min_width + 10, __min_height + 60)
+    angle3, org3 = "PCA delta: " + str(int(delta_angle)), (__min_width + 10, __min_height + 90)
+    movement, org4 = "movement: " + str(movement), (__min_width + 10, __min_height + 120)
 
     cv2.putText(src, angle1, org1, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, angle2, org2, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, angle3, org3, __font_face, __font_scale, __font_color, __font_thickness)
-
-    return src
-
-def draw_movement(movement, src):
-    text = "movement: " + str(movement)
-    org = (10,120)
-
-    cv2.putText(src, text, org, __font_face, __font_scale, __font_color, __font_thickness)
-
-    return src
+    cv2.putText(src, movement, org4, __font_face, __font_scale, __font_color, __font_thickness)
