@@ -11,12 +11,12 @@ def calculate_pca(contour):
     # Calculate d-dimensional empirical mean vector
     mean_x = np.mean(contour[:,0])
     mean_y = np.mean(contour[:,1])
-    mean_vec = np.array([[mean_x], [mean_y]]).reshape(1, -1)
+    vec_center = np.array([[mean_x], [mean_y]]).reshape(1, -1)
 
     # Calculate deviations from mean
     mean_dev = []
     for row in contour:
-        mean_dev.append(row - mean_vec)
+        mean_dev.append(row - vec_center)
     
     mean_dev = np.asarray(mean_dev)
     mean_dev = np.reshape(mean_dev, (mean_dev.shape[0], mean_dev.shape[2]))
@@ -25,7 +25,7 @@ def calculate_pca(contour):
     cov_mat = np.cov([mean_dev[:,0], mean_dev[:,1]])
 
     # Find eigenvectors and eigenvalues of covariance matrix
-    mean, eigenvectors = cv2.PCACompute(cov_mat, mean_vec)
+    mean, eigenvectors = cv2.PCACompute(cov_mat, vec_center)
     retval, eigenvalues, eigenvectors2 = cv2.eigen(cov_mat)
     eig_val_cov, eig_vec_cov = np.linalg.eig(cov_mat)
 
@@ -34,7 +34,7 @@ def calculate_pca(contour):
     eig_pairs.sort(key=lambda x: x[0], reverse=True)
     eig_pairs = eig_pairs[0:2]
 
-    return eig_pairs, mean_vec
+    return eig_pairs, vec_center
 
 
 def get_latest_eig_vectors(eig_pairs):

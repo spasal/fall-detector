@@ -57,8 +57,6 @@ def calculate_movement_coeff(contour, current_frame, previous_frame, test=False)
         frm_area = current_frame.shape[0] * current_frame.shape[1]
         # print(sum_difference, ' * ', cnt_area, ' / ', frm_area)
         normalised = (sum_difference * cnt_area) / (frm_area * 1000)
-        textName = "test motion coeff " + str(test)
-        cv2.imshow(textName, difference)
         return round(normalised, 3)
     else:
         return 0

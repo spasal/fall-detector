@@ -1,4 +1,5 @@
 import numpy as np
+import statistics
 
 class FallDetector():
     def calculate_values(self, mean_vec, delta_pca, vector_angles):
@@ -18,15 +19,17 @@ class FallDetector():
         
         def calculate_mean_vec(self):
             v1, v2 = calculate_differences(self._mean_vecs[0]), calculate_differences(self._mean_vecs[1])
-            self.mean_direction_diff_vec = [np.mean(v1), np.mean(v2)]
+            # print("center_y %s " % v2)
+            self.mean_direction_diff_vec = [np.mean(v2), sum(v2)]
 
         def calculate_delta_pca(self):
             # v1 = calculate_differences(self._delta_pcas)
-            self.mean_delta_pca = np.mean(self._delta_pcas)
+            self.mean_delta_pca = statistics.median(self._delta_pcas)
 
         def calculate_pca(self):
             v1, v2 = calculate_differences(self._angle_pcas[0]), calculate_differences(self._angle_pcas[1])
-            self.mean_anlge_pcas = [np.mean(v1), np.mean(v2)]
+            # print("pca1 %s " % v1)
+            self.mean_anlge_pcas = [np.mean(v1), sum(v1)]
 
         calculate_mean_vec(self)
         calculate_delta_pca(self)
@@ -59,7 +62,7 @@ class FallDetector():
         else:
             prop[0].append(val[0])
             prop[1].append(val[1])
-    
+
     def __init__(self):
         self._mean_vecs = []
         self._mean_vecs.append([]), self._mean_vecs.append([])        

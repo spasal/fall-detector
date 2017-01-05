@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 
+'''' FRAME PREPARATION AND CLEANUP '''
+_min_Area = 100*100
 _useGaussian = True
 _gaussianPixels = 21
 
@@ -8,9 +10,16 @@ def prepare_frame(frame):
     """
     todo
     """
-    # frame = imutils.resize(frame, width=500)
+
+    ''''
+    r = 750.0 / frame.shape[1]
+    dim = (750, int(frame.shape[0] * r))
+    frame = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)
+    frame = imutils.resize(frame, width=500)
+    '''
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    if _useGaussian: gray = cv2.GaussianBlur(gray, (_gaussianPixels, _gaussianPixels), 0)
+    if _useGaussian:
+        gray = cv2.GaussianBlur(gray, (_gaussianPixels, _gaussianPixels), 0)
     return frame, gray
 
 
@@ -24,8 +33,8 @@ def find_largest_contour(binary_threshold):
     for cnt in contours:
         if len(cnt) < 6:
             continue
-
-        if cv2.contourArea(cnt) < 2000:
+        
+        if cv2.contourArea(cnt) < _min_Area:
             continue
 
         if cv2.contourArea(cnt) > largest_area:
@@ -33,7 +42,9 @@ def find_largest_contour(binary_threshold):
             largest_contour = cnt
 
     if largest_contour is not None:
-        largest_contour = largest_contour if len(largest_contour) > 6 else None
+        if len(largest_contour) < 6 or cv2.contourArea(largest_contour) < _min_Area:
+            largest_contour = None
+
     return largest_contour
 
 
@@ -59,6 +70,19 @@ def draw_ellipse(frame, contour, is_fall=False):
     color = (0, 0, 255) if is_fall is True else (0, 255, 0)
     cv2.ellipse(frame, ellipse, color, 2)
 
+def draw_rectangle(frame, contour, is_fall=False):
+    rect = cv2.minAreaRect(contour)
+    print(type(rect))
+    print(rect)
+    box = cv2.boxPoints(rect)
+    print(type(box))
+    print(box)
+    box = np.int0(box)
+    print(type(box))
+    print(box)
+    color = (0, 0, 255) if is_fall is True else (0, 255, 0)
+    cv2.drawContours(frame, [box], 0, color, 2)
+
 def draw_feature_extraction(vector_angles, delta_angle, movement, src):
     angle1, org1 = "primary PCA: " + str(int(vector_angles[0])), (__min_width + 10, __min_height + 30)
     angle2, org2 = "secondary PCA: " + str(int(vector_angles[1])), (__min_width + 10, __min_height + 60)
@@ -69,3 +93,39 @@ def draw_feature_extraction(vector_angles, delta_angle, movement, src):
     cv2.putText(src, angle2, org2, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, angle3, org3, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, movement, org4, __font_face, __font_scale, __font_color, __font_thickness)
+
+    if __max_width == 0 or __max_height == 0:
+        print(type(src))
+        print(src.shape)
+        global __max_width, __max_height
+        __max_width = src.shape[1]
+        __max_height = src.shape[0]
+
+
+import sys
+__delta = ""
+print(sys.getdefaultencoding())
+# print(u"\N{GREEK CAPITAL LETTER DELTA}")
+
+def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, src):
+    # mean_direction_diff_vec
+    mean_dir_diff_vec_x, mean_dir_diff_vec_y = (
+        float('%.3f' % mean_direction_diff_vec[0]), float('%.3f' % mean_direction_diff_vec[1]))
+    mean_dir_diff_vec_txt, org1 = __delta + "Mean Vector: %s | %s" % (
+        mean_dir_diff_vec_x, mean_dir_diff_vec_y), (__min_width + 10, __max_height - 30)
+    
+    # mean_pca_angles
+    mean_angle_pcas_x, mean_angle_pcas_y = (
+        float('%.3f' % mean_angle_pcas[0]), float('%.3f' % mean_angle_pcas[1]))
+    mean_angle_pcas_txt, org3 = __delta + "Mean PCA Angles: %s | %s" % (
+        mean_angle_pcas_x, mean_angle_pcas_y), (__min_width + 10, __max_height - 60)
+    
+    # mean_pca_delta
+    mean_delta_pca = float('%.3f' % mean_delta_pca)
+    mean_delta_pca, org2 = "Median PCA Delta: %s" % (
+        mean_delta_pca), (__min_width + 10, __max_height - 90)
+
+    cv2.putText(src, mean_dir_diff_vec_txt, org1, __font_face, __font_scale, __font_color, __font_thickness)
+    cv2.putText(src, mean_angle_pcas_txt, org3, __font_face, __font_scale, __font_color, __font_thickness)
+    cv2.putText(src, mean_delta_pca, org2, __font_face, __font_scale, __font_color, __font_thickness)
+
