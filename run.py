@@ -98,15 +98,15 @@ def main():
         (mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles) = core.fall_detection.calculate_values(
             eig_vec_center, eig_vec_d_angle, eig_vec_angles)
 
-        is_fall = core.fall_detection.is_fall()
+        is_falling, is_fall = core.fall_detection.is_fall()
 
-        return mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, is_fall
+        return mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, is_falling, is_fall
 
 
     # extra: draw relevant data
-    def draw_primary_values(contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_fall, src):
+    def draw_primary_values(contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_falling, is_fall, src):
         helper.frame_operations.draw_ellipse(
-            src, contour, is_fall)
+            src, contour, is_falling, is_fall)
 
         core.pca_methods.draw_pca_on_image(
             eig_vecs_points, src)
@@ -140,11 +140,11 @@ def main():
             (eig_vec_angles, eig_vec_d_angle, movement_coeff) = feature_extraction(
                 largest_contour, eig_vec_points, background_mask, mhi)
 
-            (mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, is_fall) = fall_detection(
+            (mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, is_falling, is_fall) = fall_detection(
                 eig_vec_center, eig_vec_angles, eig_vec_d_angle, movement_coeff)
 
             draw_primary_values(
-                largest_contour, eig_vec_points, eig_vec_angles, eig_vec_d_angle, movement_coeff, is_fall, frame)
+                largest_contour, eig_vec_points, eig_vec_angles, eig_vec_d_angle, movement_coeff, is_falling, is_fall, frame)
 
             draw_secondary_values(
                 mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, frame)

@@ -65,21 +65,16 @@ __font_color, __font_thickness = (255, 255, 255), 2
 __min_width, __min_height = 0, 0
 __max_width, __max_height = 0, 0
 
-def draw_ellipse(frame, contour, is_fall=False):
+def draw_ellipse(frame, contour, is_falling=False, is_fall=False):
     ellipse = cv2.fitEllipse(contour)
-    color = (0, 0, 255) if is_fall is True else (0, 255, 0)
+    color = (0, 69, 255) if is_falling is True else (0, 255, 0)
+    color = (0, 0, 255) if is_fall is True else color
     cv2.ellipse(frame, ellipse, color, 2)
 
 def draw_rectangle(frame, contour, is_fall=False):
     rect = cv2.minAreaRect(contour)
-    print(type(rect))
-    print(rect)
     box = cv2.boxPoints(rect)
-    print(type(box))
-    print(box)
     box = np.int0(box)
-    print(type(box))
-    print(box)
     color = (0, 0, 255) if is_fall is True else (0, 255, 0)
     cv2.drawContours(frame, [box], 0, color, 2)
 
@@ -104,24 +99,24 @@ def draw_feature_extraction(vector_angles, delta_angle, movement, src):
 
 import sys
 __delta = ""
-print(sys.getdefaultencoding())
+# print(sys.getdefaultencoding())
 # print(u"\N{GREEK CAPITAL LETTER DELTA}")
 
 def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, src):
     # mean_direction_diff_vec
     mean_dir_diff_vec_x, mean_dir_diff_vec_y = (
-        float('%.3f' % mean_direction_diff_vec[0]), float('%.3f' % mean_direction_diff_vec[1]))
+        int(mean_direction_diff_vec[0]), int(mean_direction_diff_vec[1]))
     mean_dir_diff_vec_txt, org1 = __delta + "Mean Vector: %s | %s" % (
         mean_dir_diff_vec_x, mean_dir_diff_vec_y), (__min_width + 10, __max_height - 30)
     
     # mean_pca_angles
     mean_angle_pcas_x, mean_angle_pcas_y = (
-        float('%.3f' % mean_angle_pcas[0]), float('%.3f' % mean_angle_pcas[1]))
+        int(mean_angle_pcas[0]), int(mean_angle_pcas[1]))
     mean_angle_pcas_txt, org3 = __delta + "Mean PCA Angles: %s | %s" % (
         mean_angle_pcas_x, mean_angle_pcas_y), (__min_width + 10, __max_height - 60)
     
     # mean_pca_delta
-    mean_delta_pca = float('%.3f' % mean_delta_pca)
+    mean_delta_pca = int(mean_delta_pca)
     mean_delta_pca, org2 = "Median PCA Delta: %s" % (
         mean_delta_pca), (__min_width + 10, __max_height - 90)
 
