@@ -100,7 +100,7 @@ __delta = ""
 # print(sys.getdefaultencoding())
 # print(u"\N{GREEK CAPITAL LETTER DELTA}")
 
-def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, src):
+def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, color_code, src):
     # mean_direction_diff_vec
     mean_dir_diff_vec_x, mean_dir_diff_vec_y = (
         int(mean_direction_diff_vec[0]), int(mean_direction_diff_vec[1]))
@@ -121,4 +121,18 @@ def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas
     cv2.putText(src, mean_dir_diff_vec_txt, org1, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, mean_angle_pcas_txt, org3, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, mean_delta_pca, org2, __font_face, __font_scale, __font_color, __font_thickness)
+
+    if color_code != (0, 255, 0):
+        text = "COLOR NOT DEFINED"
+        print(color_code)
+        if color_code == (0, 255, 255):
+            text = "FALL SIMPLE"
+        elif color_code == (0, 165, 255):
+            text = "FALL ADVANCED"
+        elif color_code == (0, 0, 255):
+            text = "!IS FALL!"
+        
+        org = (int(__max_width / 2), int(__max_height / 2))
+
+        cv2.putText(src, text, org, __font_face, __font_scale, __font_color, __font_thickness)
 

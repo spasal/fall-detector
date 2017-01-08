@@ -16,6 +16,7 @@ def main():
     import cv2
     import core
     import helper
+    import numpy as np
 
     # 1 prepare frame for shape analysis
     def background_estimation(src):
@@ -104,19 +105,19 @@ def main():
 
 
     # extra: draw relevant data
-    def draw_primary_values(contour, eig_vecs_points, vector_angles, delta_angle, movement_coeff, is_falling, is_fall, src):
+    def draw_fall(contour, eig_vecs_points, color_code, is_fall, src):
         helper.frame_operations.draw_ellipse(
-            src, contour, is_falling, is_fall)
+            src, contour, color_code, is_fall)
 
         core.pca_methods.draw_pca_on_image(
             eig_vecs_points, src)
 
+    def draw_values(vector_angles, delta_angle, movement_coeff, mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, color_code, src):
         helper.frame_operations.draw_feature_extraction(
             vector_angles, delta_angle, movement_coeff, src)
 
-    def draw_secondary_values(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, src):
         helper.frame_operations.draw_fall_detection(
-            mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, src)
+            mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas, color_code, src)
 
 
     # main: here runs the code
@@ -132,7 +133,8 @@ def main():
         if not grabbed: break
 
         frame, background_mask, binary_threshold, largest_contour = background_estimation(frame)
- 
+        frame_values = np.zeros((frame.shape[0], frame.shape[1], frame.shape[2]), np.uint8)
+
         if largest_contour is not None:
             (eig_vec_points, eig_vec_center, mhi) = shape_analysis(
                 background_mask, largest_contour)
@@ -143,15 +145,15 @@ def main():
             (mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, is_falling, is_fall) = fall_detection(
                 eig_vec_center, eig_vec_angles, eig_vec_d_angle, movement_coeff)
 
-            draw_primary_values(
-                largest_contour, eig_vec_points, eig_vec_angles, eig_vec_d_angle, movement_coeff, is_falling, is_fall, frame)
+            draw_fall(
+                largest_contour, eig_vec_points, is_falling, is_fall, frame)
 
-            draw_secondary_values(
-                mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, frame)
+            draw_values(
+                eig_vec_angles, eig_vec_d_angle, movement_coeff, mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, is_falling, frame_values)
 
         cv2.imshow('feed', frame)
+        cv2.imshow('values', frame_values)
         cv2.imshow('backgroundmask', background_mask)
-        if largest_contour is not None: cv2.imshow("mhi", mhi)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
