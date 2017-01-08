@@ -60,10 +60,11 @@ def clean_frame_within_contour(src, contour):
 
 
 '''' DRAWING FUNCTIONS '''
-__font_face, __font_scale, = cv2.FONT_HERSHEY_SIMPLEX, 0.75
-__font_color, __font_thickness = (255, 255, 255), 2
+__font_face, __font_scale, = cv2.FONT_HERSHEY_SIMPLEX, 1.25
+__font_color, __font_thickness = (255, 255, 255), 3
 __min_width, __min_height = 0, 0
 __max_width, __max_height = 0, 0
+__base_val = 40
 
 def draw_ellipse(frame, contour, color_code, is_fall=False):
     ellipse = cv2.fitEllipse(contour)
@@ -77,10 +78,10 @@ def draw_rectangle(frame, contour, is_fall=False):
     cv2.drawContours(frame, [box], 0, color, 2)
 
 def draw_feature_extraction(vector_angles, delta_angle, movement, src):
-    angle1, org1 = "primary PCA: " + str(int(vector_angles[0])), (__min_width + 10, __min_height + 30)
-    angle2, org2 = "secondary PCA: " + str(int(vector_angles[1])), (__min_width + 10, __min_height + 60)
-    angle3, org3 = "PCA delta: " + str(int(delta_angle)), (__min_width + 10, __min_height + 90)
-    movement, org4 = "movement: " + str(movement), (__min_width + 10, __min_height + 120)
+    angle1, org1 = "primary PCA: " + str(int(vector_angles[0])), (__min_width + 10, __min_height + 1 * __base_val)
+    angle2, org2 = "secondary PCA: " + str(int(vector_angles[1])), (__min_width + 10, __min_height + 2 * __base_val)
+    angle3, org3 = "PCA delta: " + str(int(delta_angle)), (__min_width + 10, __min_height + 3 * __base_val)
+    movement, org4 = "movement: " + str(movement), (__min_width + 10, __min_height + 4 * __base_val)
 
     cv2.putText(src, angle1, org1, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, angle2, org2, __font_face, __font_scale, __font_color, __font_thickness)
@@ -105,18 +106,18 @@ def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas
     mean_dir_diff_vec_x, mean_dir_diff_vec_y = (
         int(mean_direction_diff_vec[0]), int(mean_direction_diff_vec[1]))
     mean_dir_diff_vec_txt, org1 = __delta + "Mean Vector: %s | %s" % (
-        mean_dir_diff_vec_x, mean_dir_diff_vec_y), (__min_width + 10, __max_height - 30)
+        mean_dir_diff_vec_x, mean_dir_diff_vec_y), (__min_width + 10, __max_height - 1 * __base_val)
     
     # mean_pca_angles
     mean_angle_pcas_x, mean_angle_pcas_y = (
         int(mean_angle_pcas[0]), int(mean_angle_pcas[1]))
     mean_angle_pcas_txt, org3 = __delta + "Mean PCA Angles: %s | %s" % (
-        mean_angle_pcas_x, mean_angle_pcas_y), (__min_width + 10, __max_height - 60)
+        mean_angle_pcas_x, mean_angle_pcas_y), (__min_width + 10, __max_height - 2 * __base_val)
     
     # mean_pca_delta
     mean_delta_pca = int(mean_delta_pca)
     mean_delta_pca, org2 = "Median PCA Delta: %s" % (
-        mean_delta_pca), (__min_width + 10, __max_height - 90)
+        mean_delta_pca), (__min_width + 10, __max_height - 3 * __base_val)
 
     cv2.putText(src, mean_dir_diff_vec_txt, org1, __font_face, __font_scale, __font_color, __font_thickness)
     cv2.putText(src, mean_angle_pcas_txt, org3, __font_face, __font_scale, __font_color, __font_thickness)
@@ -132,7 +133,7 @@ def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas
         elif color_code == (0, 0, 255):
             text = "!IS FALL!"
         
-        org = (int(__max_width / 2), int(__max_height / 2))
+        org = (int(__max_width / 2) - 100, int(__max_height / 2))
 
         cv2.putText(src, text, org, __font_face, __font_scale, __font_color, __font_thickness)
 

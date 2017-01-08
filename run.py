@@ -17,6 +17,7 @@ def main():
     import core
     import helper
     import numpy as np
+    import time
 
     # 1 prepare frame for shape analysis
     def background_estimation(src):
@@ -26,7 +27,6 @@ def main():
         2: mask, bin_treshold --> MOG2 background substraction
         3: find biggest contour inside bin_treshold
         '''
-
         src, gray = helper.frame_operations.prepare_frame(src)
         backgroundmask, bintreshold = core.background_substraction(gray)
         largest_contour = helper.frame_operations.find_largest_contour(bintreshold)
@@ -127,6 +127,7 @@ def main():
         (grabbed, frame) = cap.read()
         if grabbed:
             core.motion_history.initialze_mhi(frame)
+            time.sleep(1)
 
     while cap.isOpened():
         (grabbed, frame) = cap.read()
@@ -150,6 +151,9 @@ def main():
 
             draw_values(
                 eig_vec_angles, eig_vec_d_angle, movement_coeff, mean_eig_vec_dcenter, mean_eig_vec_d_angle, mean_eig_vec_dangles, is_falling, frame_values)
+            
+            if is_fall: helper.start_alarm()
+            else: helper.stop_alarm()
 
         cv2.imshow('feed', frame)
         cv2.imshow('values', frame_values)

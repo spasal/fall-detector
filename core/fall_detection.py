@@ -36,7 +36,7 @@ class FallDetector():
             if self._is_falling:
                 color_code = (0, 165, 255)
 
-            if elapsed >= 2:
+            if elapsed >= 1:
                 self._is_fall = True
                 color_code = (0, 0, 255)
         
