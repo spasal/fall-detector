@@ -1,5 +1,6 @@
 import numpy as np
 import statistics
+import time
 
 class FallDetector():
     def calculate_values(self, mean_vec, delta_pca, vector_angles):
@@ -9,15 +10,42 @@ class FallDetector():
         return self.mean_direction_diff_vec, self.mean_delta_pca, self.mean_anlge_pcas
     
     def is_fall(self):
-        is_falling, is_fall = False, False
         dcenter_x, dcenter_y = self.mean_direction_diff_vec[0], self.mean_direction_diff_vec[1]
-        
+        dpca1, dpca2 = self.mean_anlge_pcas[0], self.mean_anlge_pcas[1]
+        vpca1 = self._angle_pcas[0][len(self._angle_pcas[0]) -1]
+        vpca2 = self._angle_pcas[1][len(self._angle_pcas[1]) -1]
+        color_code = (0, 255, 0)
+
         # check if centrum is making fall movement
         if dcenter_y > 50 and (dcenter_x > 50 or dcenter_x < -50):
-            # check if pca_angles are moving
-            is_falling = True
+            color_code = (0, 255, 255)
 
-        return is_falling, is_fall
+            # check if pca_angles are moving
+            if dpca1 < -25 and dpca2 < -25:
+                self._is_falling = True
+                color_code = (0, 165, 255)
+
+                # check if angles have falling values
+                if (vpca1 >= 70 and vpca1 <= 110) and (vpca2 >= 160 and vpca2 <= 200):
+                    self._fall_count = time.time()
+
+        # check if angles = fall and time > 3
+        if (vpca1 >= 70 and vpca1 <= 110) and (vpca2 >= 160 and vpca2 <= 200):
+            elapsed = int(time.time() - self._fall_count)
+
+            if self._is_falling:
+                color_code = (0, 165, 255)
+
+            if elapsed > 3:
+                self._is_fall = True
+                color_code = (0, 0, 255)
+        
+        if color_code is (0, 255, 0):
+            self._is_falling = False
+            self._is_fall = False
+            self._fall_count = time.time()
+
+        return color_code, self._is_fall
 
     '''' CORE PRIVATE HELPERS '''
     def __calculate_mean_values(self):
@@ -79,6 +107,10 @@ class FallDetector():
         self._angle_pcas.append([]), self._angle_pcas.append([])
 
         self.var_length = 30
+
+        self._is_falling = False
+        self._is_fall = False
+        self._fall_count = 0
 
 
 fall_detection = FallDetector()

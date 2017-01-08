@@ -65,11 +65,9 @@ __font_color, __font_thickness = (255, 255, 255), 2
 __min_width, __min_height = 0, 0
 __max_width, __max_height = 0, 0
 
-def draw_ellipse(frame, contour, is_falling=False, is_fall=False):
+def draw_ellipse(frame, contour, color_code, is_fall=False):
     ellipse = cv2.fitEllipse(contour)
-    color = (0, 69, 255) if is_falling is True else (0, 255, 0)
-    color = (0, 0, 255) if is_fall is True else color
-    cv2.ellipse(frame, ellipse, color, 2)
+    cv2.ellipse(frame, ellipse, color_code, 2)
 
 def draw_rectangle(frame, contour, is_fall=False):
     rect = cv2.minAreaRect(contour)
