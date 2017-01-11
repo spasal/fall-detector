@@ -125,7 +125,6 @@ def draw_fall_detection(mean_direction_diff_vec, mean_delta_pca, mean_angle_pcas
 
     if color_code != (0, 255, 0):
         text = "COLOR NOT DEFINED"
-        print(color_code)
         if color_code == (0, 255, 255):
             text = "FALL SIMPLE"
         elif color_code == (0, 165, 255):

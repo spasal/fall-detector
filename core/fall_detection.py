@@ -3,19 +3,31 @@ import statistics
 import time
 
 class FallDetector():
-    def calculate_values(self, mean_vec, delta_pca, vector_angles):
-        self.__update_values(mean_vec, delta_pca, vector_angles)
+    def calculate_values(self, mean_vec, delta_pca, vector_angles, movement_coeff):
+        '''' todo '''
+        self.__update_values(mean_vec, delta_pca, vector_angles, movement_coeff)
         self.__calculate_mean_values()
         # print("dmean_vec: %s delta_pca: %s pcas: %s" % (self.mean_direction_diff_vec, self.mean_delta_pca, self.mean_anlge_pcas))
         return self.mean_direction_diff_vec, self.mean_delta_pca, self.mean_anlge_pcas
-    
+
+    def reset_fall(self):
+        '''' todo '''
+        self._is_falling = False
+        self._is_fall = False
+        self._fall_count = time.time()
+
     def is_fall(self):
+        '''' todo '''
+
+        # GET ALL THE VARIABLES WE NEED
         dcenter_x, dcenter_y = self.mean_direction_diff_vec[0], self.mean_direction_diff_vec[1]
         dpca1, dpca2 = self.mean_anlge_pcas[0], self.mean_anlge_pcas[1]
         vpca1 = self._angle_pcas[0][len(self._angle_pcas[0]) -1]
         vpca2 = self._angle_pcas[1][len(self._angle_pcas[1]) -1]
         color_code = (0, 255, 0)
 
+
+        # IF PERSON IS FALLING --> START TIMER
         # check if centrum is making fall movement
         if dcenter_y > 50 and (dcenter_x > 50 or dcenter_x < -50):
             color_code = (0, 255, 255)
@@ -27,8 +39,15 @@ class FallDetector():
 
                 # check if angles have falling values
                 if (vpca1 >= 70 and vpca1 <= 110) and (vpca2 >= 160 and vpca2 <= 200):
-                    self._fall_count = time.time()
 
+                    # check movement? check delta?
+                    if self._movement_coeff > 10:
+
+                        # start counting for fall
+                        self._fall_count = time.time()
+
+
+        # IF PERSON FELL, CHECK IF LIES FOR 2s
         # check if angles = fall and time > 3
         if (vpca1 >= 70 and vpca1 <= 110) and (vpca2 >= 160 and vpca2 <= 200):
             elapsed = int(time.time() - self._fall_count)
@@ -39,7 +58,8 @@ class FallDetector():
             if elapsed >= 1:
                 self._is_fall = True
                 color_code = (0, 0, 255)
-        
+
+
         if color_code == (0, 255, 0):
             self._is_falling = False
             self._is_fall = False
@@ -68,7 +88,7 @@ class FallDetector():
         calculate_delta_pca(self)
         calculate_pca(self)
 
-    def __update_values(self, mean_vec, delta_pca, vector_angles):
+    def __update_values(self, mean_vec, delta_pca, vector_angles, movement_coeff):
         # append
         self.__push_propval(self._mean_vecs, mean_vec[0], True) # mean_vec is arr in arr
         self.__push_propval(self._delta_pcas, delta_pca)
@@ -78,6 +98,8 @@ class FallDetector():
         self.__pop_propval(self._mean_vecs, True)
         self.__pop_propval(self._delta_pcas)
         self.__pop_propval(self._angle_pcas, True)
+
+        self._movement_coeff = movement_coeff
 
 
     '''' EXTRA PRIVATE HELPERS '''
@@ -106,6 +128,7 @@ class FallDetector():
         self._angle_pcas = []
         self._angle_pcas.append([]), self._angle_pcas.append([])
 
+        self._movement_coeff = 0
         self.var_length = 30
 
         self._is_falling = False
