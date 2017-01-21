@@ -1,8 +1,13 @@
 import pygame
 import time
+import sys, os
+
+pathname = os.path.dirname(sys.argv[0])
+full_path = os.path.abspath(pathname)
+resource_file = os.path.join(full_path, "ignore", "resources", "alarm.wav")
 
 pygame.mixer.init()
-__s = pygame.mixer.Sound("C:\\Users\\alexs\\Google Drive\\NMCT\\A & V Productions\\Project\\fall-detector\\ignore\\resources\\alarm.wav")
+__s = pygame.mixer.Sound(resource_file)
 
 # Start playback
 def start_alarm():
